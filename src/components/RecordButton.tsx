@@ -1,130 +1,162 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { MicIcon } from '@components/Icons'
+import { calculateTimeDuration, wait } from '@/utils'
+
+import soundStartSrc from '@assets/sounds/recording-start.wav'
+import soundSendSrc from '@assets/sounds/recording-send.wav'
+import soundCancelSrc from '@assets/sounds/recording-cancel.wav'
+
+interface durationObject {
+  duration: string
+  durationTime: number
+  updateDuration: (startTime: number) => void
+  resetDuration: () => void
+}
+
+interface audioState {
+  isRecording: boolean
+  blobs: Array<Blob | never>
+  url: string | null
+}
+
+const useDuration = (
+  initialValue = calculateTimeDuration(new Date().getTime())
+): durationObject => {
+  const [duration, setDuration] = useState(initialValue)
+  const [durationTime, setDurationTime] = useState(0)
+
+  const resetDuration = useCallback(() => {
+    setDuration(initialValue)
+    setDurationTime(0)
+  }, [initialValue])
+
+  const updateDuration = (startTime: number): void => {
+    setDuration(calculateTimeDuration(startTime))
+    setDurationTime(new Date().getTime() - startTime)
+  }
+
+  return { duration, durationTime, updateDuration, resetDuration }
+}
 
 export const RecordButton: React.FC = () => {
-  const mediaRecorder = useRef<MediaRecorder | null>(null)
-  const [permission, setPermission] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
-  const [stream, setStream] = useState<MediaStream | null>(null)
-  const [audioChunks, setAudioChunks] = useState<Blob[] | never[]>([])
-  const [audio, setAudio] = useState<string | null>(null)
+  const startSound = new Audio(soundStartSrc)
+  const sendSound = new Audio(soundSendSrc)
+  const cancelSound = new Audio(soundCancelSrc)
 
-  const mimeType = 'audio/webm'
+  const recorder = useRef<MediaRecorder | null>(null)
+  const stream = useRef<MediaStream | null>(null)
+  const alertDelayRef = useRef<NodeJS.Timeout>()
 
-  const getMicrophonePermission = async (): Promise<void> => {
-    if ('MediaRecorder' in window) {
-      try {
-        const streamData = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        setPermission(true)
-        setStream(streamData)
-      } catch (err: unknown) {
-        console.error(err)
-      }
-    } else {
-      alert('The MediaRecorder API is not supported in your browser.')
-    }
-  }
+  const { duration, durationTime, updateDuration, resetDuration } = useDuration()
 
-  const startRecording = async (): Promise<void> => {
-    if (stream !== null) {
-      setIsRecording(true)
-      // create new Media recorder instance using the stream
-      const media = new MediaRecorder(stream, { mimeType })
-      // set the MediaRecorder instance to the mediaRecorder ref
-      mediaRecorder.current = media
-      // invokes the start method to start the recording process
-      mediaRecorder.current.start()
-      const localAudioChunks: Array<Blob | never> = []
-      mediaRecorder.current.ondataavailable = (event) => {
-        if (typeof event.data === 'undefined') return
-        if (event.data.size === 0) return
-        localAudioChunks.push(event.data)
-      }
-      setAudioChunks(localAudioChunks)
-    }
-  }
+  const [showAlert, setShowAlert] = useState(false)
 
-  const stopRecording = async (): Promise<void> => {
-    if (mediaRecorder.current !== null) {
-      setIsRecording(false)
-      // stops the recording instance
-      mediaRecorder.current.stop()
-      mediaRecorder.current.onstop = () => {
-        // creates a blob file from the audiochunks data
-        const audioBlob = new Blob(audioChunks, { type: mimeType })
-        // creates a playable URL from the blob file.
-        const audioUrl = URL.createObjectURL(audioBlob)
-        setAudio(audioUrl)
-        setAudioChunks([])
-      }
-    }
-  }
+  const [audio, setAudio] = useState<audioState>({
+    isRecording: false,
+    blobs: [],
+    url: null
+  })
 
-  const startSound = new Audio('/sounds/recording-start.wav')
-  // const cancelSound = new Audio('/sounds/recording-cancel.wav')
-  const sendSound = new Audio('/sounds/recording-send.wav')
-
-  const handleStart = async (
-    event: React.TouchEvent | React.MouseEvent<HTMLButtonElement>
-  ): Promise<void> => {
-    if (event instanceof MouseEvent) {
-      event.preventDefault()
-    }
+  const startRecording = async (event: React.PointerEvent): Promise<void> => {
     event.currentTarget.classList.add('recording')
+    setAudio((state) => ({ ...state, isRecording: true }))
+    setShowAlert(false)
+
+    stream.current = await navigator.mediaDevices.getUserMedia({ audio: true })
     await startSound.play()
-    await startRecording()
+
+    recorder.current = new MediaRecorder(stream.current, { audioBitsPerSecond: 128000 })
+    recorder.current.start(1000)
+
+    const startTime = new Date().getTime()
+    const blobs: Array<Blob | never> = []
+
+    recorder.current.ondataavailable = ({ data }) => {
+      if (typeof data === 'undefined') return
+      if (data.size === 0) return
+      blobs.push(data)
+      updateDuration(startTime)
+    }
+
+    setAudio((state) => ({ ...state, blobs }))
   }
 
-  const handleEnd = async (
-    event: React.TouchEvent | React.MouseEvent<HTMLButtonElement>
-  ): Promise<void> => {
-    if (event instanceof MouseEvent) {
-      event.preventDefault()
-    }
+  const stopRecording = async (event: React.PointerEvent): Promise<void> => {
     event.currentTarget.classList.remove('recording')
-    await sendSound.play()
-    await stopRecording()
+    setAudio((state) => ({ ...state, isRecording: false }))
+
+    await wait(500)
+
+    if (recorder.current !== null) {
+      recorder.current.stop()
+
+      recorder.current.onstop = async () => {
+        stream.current?.getAudioTracks().forEach((track) => {
+          track.stop()
+        })
+
+        if (durationTime < 1000) {
+          await cancelSound.play()
+          setShowAlert(true)
+          resetDuration()
+          return
+        }
+
+        if (audio.blobs.length > 0) {
+          const audioBlob = new Blob(audio.blobs)
+          const audioUrl = URL.createObjectURL(audioBlob)
+          setAudio((state) => ({ ...state, url: audioUrl, blobs: [] }))
+        }
+
+        await sendSound.play()
+        resetDuration()
+      }
+    }
   }
 
   useEffect(() => {
-    if (audio !== null) {
-      const voiceAudio = new Audio(audio)
-      voiceAudio
-        .play()
-        .then(() => {
-          setAudio(null)
-        })
-        .catch(null)
-    }
-  }, [audio])
+    if (showAlert) {
+      alertDelayRef.current = setTimeout(() => {
+        setShowAlert(false)
+      }, 4000)
+    } else clearTimeout(alertDelayRef.current)
+  }, [showAlert])
 
   return (
     <div className='flex items-center justify-center px-2.5'>
-      {permission && (
-        <button
-          type='button'
-          className='relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary hover:bg-primary-700 focus:outline-none [&.recording>span]:animate-ping [&.recording>span]:bg-primary [&.recording]:-translate-y-1/2 [&.recording]:scale-150'
-          onClick={isRecording ? handleEnd : handleStart}
-          onTouchStart={handleStart}
-          onTouchEnd={handleEnd}
-        >
-          <span className='absolute inline-flex h-full w-full rounded-full opacity-75' />
-          <MicIcon className='h-6 w-6 fill-light' />
-          <span className='sr-only'>voice command</span>
-        </button>
-      )}
+      <audio // ? temporary element to check if audio was recorded successfully
+        autoPlay
+        style={{
+          position: 'fixed',
+          top: 'calc((100dvh - 100% - 1rem) * -1)',
+          left: '50%',
+          transform: 'translateX(-50%)'
+        }}
+        src={audio.url ?? ''}
+        onEnded={() => {
+          setAudio((state) => ({ ...state, url: null }))
+        }}
+      />
 
-      {!permission && (
-        <button
-          type='button'
-          className='relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-secondary hover:bg-secondary-500 focus:outline-none'
-          onClick={getMicrophonePermission}
-        >
-          <span className='absolute inline-flex h-full w-full rounded-full opacity-75' />
-          <MicIcon className='h-6 w-6 fill-light' />
-          <span className='sr-only'>voice command</span>
-        </button>
-      )}
+      <button
+        type='button'
+        className='relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary hover:bg-primary-700 focus:outline-none [&.recording]:-translate-y-1/2 [&.recording]:scale-150'
+        onPointerDownCapture={startRecording}
+        onPointerUpCapture={stopRecording}
+        onPointerCancelCapture={stopRecording}
+      >
+        {audio.isRecording && (
+          <span className='absolute -top-2/3 whitespace-nowrap text-[0.75rem]'>{duration}</span>
+        )}
+
+        {!audio.isRecording && showAlert && (
+          <span className='absolute -top-full animate-pulse whitespace-nowrap rounded-sm bg-secondary-600 px-2 py-1 text-[0.75rem]'>
+            press and hold to record
+          </span>
+        )}
+        <MicIcon className='h-6 w-6 fill-light' />
+        <span className='sr-only'>voice command</span>
+      </button>
     </div>
   )
 }
