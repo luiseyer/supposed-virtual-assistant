@@ -1,2 +1,2 @@
-export { calculateTimeDuration } from './calculateTimeDuration'
+export { formatTime } from './formatTime'
 export { wait } from './wait'
