@@ -1,157 +1,110 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { type Stream, type Interval, type Recorder } from '@/types.d'
+import { useEffect, useRef, useState } from 'react'
 import { MicIcon } from '@components/Icons'
-import { calculateTimeDuration, wait } from '@/utils'
+import { formatTime } from '@utils'
 
 import soundStartSrc from '@assets/sounds/recording-start.wav'
 import soundSendSrc from '@assets/sounds/recording-send.wav'
 import soundCancelSrc from '@assets/sounds/recording-cancel.wav'
-
-interface durationObject {
-  duration: string
-  durationTime: number
-  updateDuration: (startTime: number) => void
-  resetDuration: () => void
-}
-
-interface audioState {
-  isRecording: boolean
-  blobs: Array<Blob | never>
-  url: string | null
-}
-
-const useDuration = (
-  initialValue = calculateTimeDuration(new Date().getTime())
-): durationObject => {
-  const [duration, setDuration] = useState(initialValue)
-  const [durationTime, setDurationTime] = useState(0)
-
-  const resetDuration = useCallback(() => {
-    setDuration(initialValue)
-    setDurationTime(0)
-  }, [initialValue])
-
-  const updateDuration = (startTime: number): void => {
-    setDuration(calculateTimeDuration(startTime))
-    setDurationTime(new Date().getTime() - startTime)
-  }
-
-  return { duration, durationTime, updateDuration, resetDuration }
-}
 
 export const RecordButton: React.FC = () => {
   const startSound = new Audio(soundStartSrc)
   const sendSound = new Audio(soundSendSrc)
   const cancelSound = new Audio(soundCancelSrc)
 
-  const recorder = useRef<MediaRecorder | null>(null)
-  const stream = useRef<MediaStream | null>(null)
-  const alertDelayRef = useRef<NodeJS.Timeout>()
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
-  const { duration, durationTime, updateDuration, resetDuration } = useDuration()
+  const stream = useRef<Stream>(null)
+  const recorder = useRef<Recorder>(null)
 
+  const [duration, setDuration] = useState(0)
   const [showAlert, setShowAlert] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
 
-  const [audio, setAudio] = useState<audioState>({
-    isRecording: false,
-    blobs: [],
-    url: null
-  })
-
-  const startRecording = async (event: React.PointerEvent): Promise<void> => {
-    event.currentTarget.classList.add('recording')
-    setAudio((state) => ({ ...state, isRecording: true }))
-    setShowAlert(false)
-
+  const handleStart = async (): Promise<void> => {
     stream.current = await navigator.mediaDevices.getUserMedia({ audio: true })
-    await startSound.play()
+    recorder.current = new MediaRecorder(stream.current)
 
-    recorder.current = new MediaRecorder(stream.current, { audioBitsPerSecond: 128000 })
     recorder.current.start(1000)
 
     const startTime = new Date().getTime()
-    const blobs: Array<Blob | never> = []
+    const currentTime = (): number => new Date().getTime() - startTime
+    const blobs: Blob[] = []
+
+    recorder.current.onstart = () => {
+      buttonRef.current?.classList.add('recording')
+      setIsRecording(true)
+      setShowAlert(false)
+      startSound.play().catch(null)
+    }
 
     recorder.current.ondataavailable = ({ data }) => {
       if (typeof data === 'undefined') return
       if (data.size === 0) return
       blobs.push(data)
-      updateDuration(startTime)
+      setDuration(currentTime())
     }
 
-    setAudio((state) => ({ ...state, blobs }))
+    recorder.current.onstop = () => {
+      buttonRef.current?.classList.remove('recording')
+      setIsRecording(false)
+
+      stream.current?.getAudioTracks()[0].stop()
+
+      if (currentTime() < 1000) {
+        cancelSound.play().catch(null)
+        setShowAlert(true)
+        setDuration(0)
+        return
+      }
+
+      const audioBlob = new Blob(blobs)
+      const audioUrl = URL.createObjectURL(audioBlob)
+
+      sendSound.play().catch(null)
+      setDuration(0)
+
+      new Audio(audioUrl).play().catch(null) // ? Prueba
+    }
   }
 
-  const stopRecording = async (event: React.PointerEvent): Promise<void> => {
-    event.currentTarget.classList.remove('recording')
-    setAudio((state) => ({ ...state, isRecording: false }))
-
-    await wait(500)
-
-    if (recorder.current !== null) {
-      recorder.current.stop()
-
-      recorder.current.onstop = async () => {
-        stream.current?.getAudioTracks().forEach((track) => {
-          track.stop()
-        })
-
-        if (durationTime < 1000) {
-          await cancelSound.play()
-          setShowAlert(true)
-          resetDuration()
-          return
-        }
-
-        if (audio.blobs.length > 0) {
-          const audioBlob = new Blob(audio.blobs)
-          const audioUrl = URL.createObjectURL(audioBlob)
-          setAudio((state) => ({ ...state, url: audioUrl, blobs: [] }))
-        }
-
-        await sendSound.play()
-        resetDuration()
-      }
-    }
+  const handleStop = (): void => {
+    recorder.current?.stop()
   }
 
   useEffect(() => {
+    let alertInterval: Interval = null
     if (showAlert) {
-      alertDelayRef.current = setTimeout(() => {
+      alertInterval = setTimeout(() => {
         setShowAlert(false)
       }, 4000)
-    } else clearTimeout(alertDelayRef.current)
+    } else typeof alertInterval === 'number' && clearTimeout(alertInterval)
+
+    return () => {
+      typeof alertInterval === 'number' && clearTimeout(alertInterval)
+    }
   }, [showAlert])
 
   return (
     <div className='flex items-center justify-center px-2.5'>
-      <audio // ? temporary element to check if audio was recorded successfully
-        autoPlay
-        style={{
-          position: 'fixed',
-          top: 'calc((100dvh - 100% - 1rem) * -1)',
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }}
-        src={audio.url ?? ''}
-        onEnded={() => {
-          setAudio((state) => ({ ...state, url: null }))
-        }}
-      />
-
       <button
+        ref={buttonRef}
         type='button'
         className='relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary hover:bg-primary-700 focus:outline-none [&.recording]:-translate-y-1/2 [&.recording]:scale-150'
-        onPointerDownCapture={startRecording}
-        onPointerUpCapture={stopRecording}
-        onPointerCancelCapture={stopRecording}
+        onPointerDownCapture={!isRecording ? handleStart : handleStop}
       >
-        {audio.isRecording && (
-          <span className='absolute -top-2/3 whitespace-nowrap text-[0.75rem]'>{duration}</span>
+        {isRecording && (
+          <>
+            <span className='absolute inset-0 animate-ping rounded-full bg-primary opacity-50' />
+            <span className='absolute -top-2/3 whitespace-nowrap text-xs'>
+              {formatTime(duration)}
+            </span>
+          </>
         )}
 
-        {!audio.isRecording && showAlert && (
-          <span className='absolute -top-full animate-pulse whitespace-nowrap rounded-sm bg-secondary-600 px-2 py-1 text-[0.75rem]'>
-            press and hold to record
+        {!isRecording && showAlert && (
+          <span className='absolute -top-full animate-pulse whitespace-nowrap rounded-sm bg-secondary-600 px-2 py-1 text-xs'>
+            record at least 1 second
           </span>
         )}
         <MicIcon className='h-6 w-6 fill-light' />
