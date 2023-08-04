@@ -1,4 +1,4 @@
-import { BottomNavigation } from '@components'
+import { BottomNavigation } from '@/components'
 
 interface Props {
   children?: React.ReactNode
@@ -6,7 +6,7 @@ interface Props {
 
 export const Page: React.FC<Props> = ({ children }) => (
   <>
-    {children}
     <BottomNavigation />
+    {children}
   </>
 )
