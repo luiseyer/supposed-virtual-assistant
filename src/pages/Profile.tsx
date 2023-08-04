@@ -1,4 +1,4 @@
-import { Page } from '@components'
+import { Page } from '@/components'
 
 export const Profile: React.FC = () => {
   return (

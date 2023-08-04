@@ -22,22 +22,7 @@
 
     /* Alias */
     "baseUrl": ".",
-    "paths": {
-      "@": ["src"],
-      "@/*": ["src/*"],
-      "@assets": ["src/assets"],
-      "@assets/*": ["src/assets/*"],
-      "@components": ["src/components"],
-      "@components/*": ["src/components/*"],
-      "@contexts": ["src/contexts"],
-      "@contexts/*": ["src/contexts/*"],
-      "@utils": ["src/utils"],
-      "@utils/*": ["src/utils/*"],
-      "@hooks": ["src/hooks"],
-      "@hooks/*": ["src/hooks/*"],
-      "@pages": ["src/pages"],
-      "@pages/*": ["src/pages/*"]
-    }
+    "paths": { "@/*": ["src/*"] }
   },
   "include": ["src", "public", "*.js", "*.ts", "*.cjs", ".eslintrc.cjs"],
   "exclude": ["node_modules", "dist"],

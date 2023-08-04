@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { Chats, Dashboard, Profile, Settings } from '@pages'
+import { Chats, Dashboard, Profile, Settings } from '@/pages'
 
 const router = createBrowserRouter([
   {
