@@ -1,11 +1,13 @@
-import { type Stream, type Interval, type Recorder } from '@/types.d'
 import { useEffect, useRef, useState } from 'react'
-import { MicIcon } from '@components/Icons'
-import { formatTime } from '@utils'
 
-import soundStartSrc from '@assets/sounds/recording-start.wav'
-import soundSendSrc from '@assets/sounds/recording-send.wav'
-import soundCancelSrc from '@assets/sounds/recording-cancel.wav'
+import { type Stream, type Interval, type Recorder } from '@/types.d'
+import { MIN_RECORDING_DURATION } from '@/consts.d'
+import { MicIcon } from '@/components/Icons'
+import { formatTime } from '@/utils'
+
+import soundStartSrc from '@/assets/sounds/recording-start.wav'
+import soundSendSrc from '@/assets/sounds/recording-send.wav'
+import soundCancelSrc from '@/assets/sounds/recording-cancel.wav'
 
 export const RecordButton: React.FC = () => {
   const startSound = new Audio(soundStartSrc)
@@ -25,7 +27,7 @@ export const RecordButton: React.FC = () => {
     stream.current = await navigator.mediaDevices.getUserMedia({ audio: true })
     recorder.current = new MediaRecorder(stream.current)
 
-    recorder.current.start(1000)
+    recorder.current.start(MIN_RECORDING_DURATION)
 
     const startTime = new Date().getTime()
     const currentTime = (): number => new Date().getTime() - startTime
@@ -51,7 +53,7 @@ export const RecordButton: React.FC = () => {
 
       stream.current?.getAudioTracks()[0].stop()
 
-      if (currentTime() < 1000) {
+      if (currentTime() < MIN_RECORDING_DURATION) {
         cancelSound.play().catch(null)
         setShowAlert(true)
         setDuration(0)
@@ -73,15 +75,16 @@ export const RecordButton: React.FC = () => {
   }
 
   useEffect(() => {
-    let alertInterval: Interval = null
+    let alertDelay: Interval = null
+
     if (showAlert) {
-      alertInterval = setTimeout(() => {
+      alertDelay = setTimeout(() => {
         setShowAlert(false)
       }, 4000)
-    } else typeof alertInterval === 'number' && clearTimeout(alertInterval)
+    } else alertDelay !== null && clearTimeout(alertDelay)
 
     return () => {
-      typeof alertInterval === 'number' && clearTimeout(alertInterval)
+      alertDelay !== null && clearTimeout(alertDelay)
     }
   }, [showAlert])
 
