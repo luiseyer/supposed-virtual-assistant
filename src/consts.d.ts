@@ -1,0 +1,1 @@
+export const MIN_RECORDING_DURATION = 1000
