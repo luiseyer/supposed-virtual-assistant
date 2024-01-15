@@ -13,11 +13,10 @@ const App = () => {
     })
   }
 
-  console.log(color)
   return (
     <NextUIProvider>
-      <div className='flex h-screen w-full items-center justify-center gap-4 dark:bg-gray-950'>
-        <h1 className='text-3xl font-bold dark:text-gray-50'>
+      <div className='flex h-screen w-full items-center justify-center gap-4'>
+        <h1 className='text-3xl font-bold'>
           Supposed Virtual Assistant
         </h1>
         <Tooltip content='Click para cambiar el color'>
