@@ -10,7 +10,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:tailwindcss/recommended'
   ],
-  plugins: ['react', 'react-hooks', 'react-refresh'],
+  plugins: ['react', 'react-hooks', 'react-refresh', 'oxlint'],
   overrides: [
     {
       env: { node: true },
