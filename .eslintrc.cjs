@@ -31,7 +31,10 @@ module.exports = {
     'import/no-absolute-path': 'off',
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
-    'react/self-closing-comp': 'error',
-    'react-refresh/only-export-components': 'warn'
+    'react-refresh/only-export-components': 'warn',
+    'react/self-closing-comp': ['error', {
+      component: true,
+      html: true
+    }]
   }
 }
