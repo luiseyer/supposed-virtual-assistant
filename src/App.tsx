@@ -25,7 +25,7 @@ const App: React.FC = () => {
           <h1 className='text-3xl font-bold'>
           Supposed Virtual Assistant
           </h1>
-          <Tooltip content='Click para cambiar el color'>
+          <Tooltip content='Click to change color'>
             <Button isIconOnly variant='light' className='animate-bounce' onClick={changeColor}>
               <RiRobot2Fill size={32} className={colors[color]}/>
             </Button>
