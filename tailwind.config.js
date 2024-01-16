@@ -17,24 +17,24 @@ export default {
       light: {
         colors: {
           primary: {
-            DEFAULT: colors.purple[500],
-            ...colors.purple
+            DEFAULT: colors.green[500],
+            ...colors.green
           },
           secondary: {
             DEFAULT: colors.blue[500],
-            ...colors.purple
+            ...colors.blue
           }
         }
       },
       dark: {
         colors: {
           primary: {
-            DEFAULT: colors.purple[400],
-            ...colors.purple
+            DEFAULT: colors.green[400],
+            ...colors.green
           },
           secondary: {
             DEFAULT: colors.blue[400],
-            ...colors.purple
+            ...colors.blue
           }
         }
       }
