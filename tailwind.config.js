@@ -1,4 +1,4 @@
-import { colors, nextui } from '@nextui-org/react'
+import { colors, commonColors, nextui } from '@nextui-org/react'
 import twColors from 'tailwindcss/colors'
 
 /** @type {import('tailwindcss').Config} */
@@ -9,6 +9,12 @@ export default {
     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
   ],
   theme: {
+    colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
+      gray: twColors.gray,
+      ...commonColors
+    },
     extend: {}
   },
   darkMode: 'class',
