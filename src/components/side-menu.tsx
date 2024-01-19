@@ -5,9 +5,9 @@ const Sidebar: React.FC = () => {
   return (
     <>
       <nav className='flex flex-col'>
-        <SideMenuItem key='chat' isActive icon={RiChat4Line}>Chat Assistant</SideMenuItem>
-        <SideMenuItem key='projects' icon={RiDashboardLine}>My Projects</SideMenuItem>
-        <SideMenuItem key='settings' icon={RiSettings2Line}>Settings</SideMenuItem>
+        <SideMenuItem link='chat' isActive icon={<RiChat4Line />}>Chat Assistant</SideMenuItem>
+        <SideMenuItem link='projects' icon={<RiDashboardLine />}>My Projects</SideMenuItem>
+        <SideMenuItem link='settings' icon={<RiSettings2Line />}>Settings</SideMenuItem>
       </nav>
     </>
   )

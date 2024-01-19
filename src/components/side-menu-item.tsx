@@ -1,25 +1,22 @@
-import { Button, Link } from '@nextui-org/react'
+import { Button } from '@nextui-org/react'
 
 interface Props {
-  key?: string
+  link?: string
   children: React.ReactNode
   isActive?: boolean
-  icon: React.ComponentType<{
-    className?: string
-  }>
+  icon: React.ReactNode
 }
 
-const SideMenuItem: React.FC<Props> = ({ key, isActive = false, children, ...props }) => {
-  const activeGroup = 'active bg-[hsl(var(--nextui-default)/0.4)]'
+const SideMenuItem: React.FC<Props> = ({ link, isActive = false, icon, children, ...props }) => {
+  const activeGroup = 'bg-[hsl(var(--nextui-default)/0.4)]'
   return (
     <Button
       data-active={isActive}
-      as={Link}
-      key={key}
-      className={`group justify-start py-8 hover:opacity-100 active:opacity-100 ${isActive && activeGroup}`}
+      data-link={link}
+      className={`group justify-start py-8 hover:opacity-100 [&[data-active=true]_svg]:fill-primary [&_svg]:fill-default-400 [&_svg]:transition-colors [&_svg]:hover:fill-primary ${isActive && activeGroup}`}
       variant='light'
       size='lg'
-      startContent={<props.icon className='fill-default-400 transition-colors group-hover:fill-primary group-[[data-active=true]]:fill-primary' />}
+      startContent={icon}
       {...props}
     >
       {children}
