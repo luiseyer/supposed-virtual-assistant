@@ -1,43 +1,44 @@
 @tailwind base;
 
 @layer base {
-  /* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: theme('colors.default-700') transparent;
-}
 
-/* Chrome, Edge and Safari */
-*::-webkit-scrollbar {
-  @apply h-2;
-  @apply w-2
-}
-*::-webkit-scrollbar-track {
-  @apply rounded;
-  @apply bg-transparent
-}
+    /* Firefox */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: theme('colors.default-700') transparent;
+    }
 
-*::-webkit-scrollbar-track:hover {
-  @apply bg-transparent
-}
+    /* Chrome, Edge and Safari */
+    *::-webkit-scrollbar {
+        @apply h-2;
+        @apply w-2
+    }
 
-*::-webkit-scrollbar-track:active {
-  @apply bg-transparent
-}
+    *::-webkit-scrollbar-track {
+        @apply rounded;
+        @apply bg-transparent
+    }
 
-*::-webkit-scrollbar-thumb {
-  @apply rounded;
-  @apply bg-default-700
-}
+    *::-webkit-scrollbar-track:hover {
+        @apply bg-transparent
+    }
 
-*::-webkit-scrollbar-thumb:hover {
-  @apply bg-default-600
-}
+    *::-webkit-scrollbar-track:active {
+        @apply bg-transparent
+    }
 
-*::-webkit-scrollbar-thumb:active {
-  @apply bg-default-600
+    *::-webkit-scrollbar-thumb {
+        @apply rounded;
+        @apply bg-default-700
+    }
 
-}
+    *::-webkit-scrollbar-thumb:hover {
+        @apply bg-default-600
+    }
+
+    *::-webkit-scrollbar-thumb:active {
+        @apply bg-default-600
+    }
 }
 
 @tailwind components;
