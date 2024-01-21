@@ -1,14 +1,40 @@
-import { useState } from 'react'
-import { Avatar, Button, Card, CardBody, CircularProgress, Input, Navbar, NavbarBrand, NavbarContent, NavbarItem, NextUIProvider, Textarea, Tooltip } from '@nextui-org/react'
 import { SideMenu } from '@components'
 import { Sidebar } from '@layouts'
-import { RiMore2Line, RiNotification4Line, RiRobot2Fill, RiSearch2Line, RiSendPlane2Line } from '@remixicon/react'
+import {
+  Avatar,
+  Button,
+  Card,
+  CardBody,
+  CircularProgress,
+  Input,
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NextUIProvider,
+  Textarea,
+  Tooltip,
+} from '@nextui-org/react'
+import {
+  RiMore2Line,
+  RiNotification4Line,
+  RiRobot2Fill,
+  RiSearch2Line,
+  RiSendPlane2Line,
+} from '@remixicon/react'
+import { useState } from 'react'
 
 const App: React.FC = () => {
   const [color, setColor] = useState(0)
-  const colors = ['text-yellow-400', 'text-blue-400', 'text-pink-400', 'text-green-400', 'text-purple-400']
+  const colors = [
+    'text-yellow-400',
+    'text-blue-400',
+    'text-pink-400',
+    'text-green-400',
+    'text-purple-400',
+  ]
   const changeColor = (): void => {
-    setColor(color => {
+    setColor((color) => {
       if (color < colors.length - 1) return color + 1
       return 0
     })
@@ -17,20 +43,21 @@ const App: React.FC = () => {
   const messages = [
     {
       user: 'Hello. How are you?',
-      system: "Hi! I'm fine, thanks for asking. Can I help you with anything?"
+      system: "Hi! I'm fine, thanks for asking. Can I help you with anything?",
     },
     {
       user: 'What is the weather in Spain? ',
-      system: 'The current weather in Spain is partially cloudy with a high of 56°F and a low of 37°F.'
+      system:
+        'The current weather in Spain is partially cloudy with a high of 56°F and a low of 37°F.',
     },
     {
       user: 'What is the square root of 56?',
-      system: 'The square root of 56 is approximately 7.48331477355.'
+      system: 'The square root of 56 is approximately 7.48331477355.',
     },
     {
       user: 'Write a poem',
-      system: null
-    }
+      system: null,
+    },
   ]
 
   const [value, setValue] = useState('')
@@ -47,7 +74,7 @@ const App: React.FC = () => {
   return (
     <NextUIProvider>
       <div className='flex max-h-dvh min-h-dvh'>
-        <Sidebar >
+        <Sidebar>
           <SideMenu />
         </Sidebar>
 
@@ -56,7 +83,7 @@ const App: React.FC = () => {
             position='static'
             classNames={{
               base: 'bg-default-900',
-              brand: 'flex items-center gap-4 text-default-300 text-xl'
+              brand: 'flex items-center gap-4 text-default-300 text-xl',
             }}
           >
             <NavbarBrand>
@@ -77,8 +104,8 @@ const App: React.FC = () => {
                       'bg-default-800',
                       'group-data-[hover=true]:bg-default-700',
                       'group-data-[focus=true]:bg-default-700',
-                      'cursor-pointer'
-                    ]
+                      'cursor-pointer',
+                    ],
                   }}
                   startContent={<RiSearch2Line size='16' />}
                 />
@@ -98,15 +125,17 @@ const App: React.FC = () => {
 
           <section className='flex h-full snap-y flex-col gap-8 overflow-y-auto p-8'>
             {messages.map(({ user, system }, i) => (
-              <div key={i} className='max-w-4xl snap-end'>
+              <div key={`message-${i}`} className='max-w-4xl snap-end'>
                 <p className='mb-8 text-default-300'>{user}</p>
                 <div className='flex items-center gap-4'>
                   <Avatar className='shrink-0' />
                   <Card shadow='sm' className='bg-default-800 text-default-300'>
                     <CardBody>
-                      {system === null
-                        ? <CircularProgress size='sm' aria-label='Loading...' />
-                        : <p>{system}</p>}
+                      {system === null ? (
+                        <CircularProgress size='sm' aria-label='Loading...' />
+                      ) : (
+                        <p>{system}</p>
+                      )}
                     </CardBody>
                   </Card>
                 </div>
@@ -115,9 +144,7 @@ const App: React.FC = () => {
           </section>
 
           <div className='hidden h-full items-center justify-center gap-4'>
-            <h1 className='text-3xl font-bold'>
-              Supposed Virtual Assistant
-            </h1>
+            <h1 className='text-3xl font-bold'>Supposed Virtual Assistant</h1>
             <Tooltip content='Click to change color'>
               <Button isIconOnly variant='light' className='animate-bounce' onClick={changeColor}>
                 <RiRobot2Fill size={32} className={colors[color]} />
@@ -143,8 +170,8 @@ const App: React.FC = () => {
                     'bg-default-800',
                     'group-data-[hover=true]:bg-default-700',
                     'group-data-[focus=true]:bg-default-700',
-                    'cursor-pointer'
-                  ]
+                    'cursor-pointer',
+                  ],
                 }}
               />
               <Button color='primary' type='submit' size='lg' isIconOnly>
@@ -154,7 +181,7 @@ const App: React.FC = () => {
           </div>
         </main>
       </div>
-    </NextUIProvider >
+    </NextUIProvider>
   )
 }
 
