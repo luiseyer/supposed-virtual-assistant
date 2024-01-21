@@ -30,6 +30,6 @@
       "@layouts/*": ["src/layouts/*"],
     },
   },
-  "include": ["*.js", "*.ts", ".eslintrc.cjs", "src"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
