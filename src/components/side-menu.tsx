@@ -4,14 +4,14 @@ import { SideMenuItem } from '.'
 export const SideMenu: React.FC = () => {
   return (
     <>
-      <nav className='flex flex-col'>
-        <SideMenuItem link='chat' isActive icon={<RiChat4Line />}>
+      <nav className='flex flex-col gap-2'>
+        <SideMenuItem route='/chat' icon={<RiChat4Line />}>
           Chat Assistant
         </SideMenuItem>
-        <SideMenuItem link='projects' icon={<RiDashboardLine />}>
+        <SideMenuItem route='/projects' icon={<RiDashboardLine />}>
           My Projects
         </SideMenuItem>
-        <SideMenuItem link='settings' icon={<RiSettings2Line />}>
+        <SideMenuItem route='/settings' icon={<RiSettings2Line />}>
           Settings
         </SideMenuItem>
       </nav>

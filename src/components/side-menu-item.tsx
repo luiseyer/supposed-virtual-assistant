@@ -1,30 +1,22 @@
 import { Button } from '@nextui-org/react'
+import { Link } from '@tanstack/react-router'
 
 interface Props {
-  link?: string
   children: React.ReactNode
-  isActive?: boolean
   icon: React.ReactNode
+  route: string
 }
 
-export const SideMenuItem: React.FC<Props> = ({
-  link,
-  isActive = false,
-  icon,
-  children,
-  ...props
-}) => {
-  const activeGroup = 'bg-[hsl(var(--nextui-default)/0.4)]'
+export const SideMenuItem: React.FC<Props> = ({ icon, children, route, ...props }) => {
   return (
     <Button
-      data-active={isActive}
-      data-link={link}
-      className={`group justify-start py-8 hover:opacity-100 [&[data-active=true]_svg]:fill-primary [&_svg]:fill-default-400 [&_svg]:transition-colors [&_svg]:hover:fill-primary ${
-        isActive && activeGroup
-      }`}
+      as={Link}
+      to={route}
       variant='light'
       size='lg'
+      activeProps={{ className: 'active' }}
       startContent={icon}
+      className='group justify-start py-8 [&.active_svg]:fill-primary [&_svg]:fill-default-400 [&_svg]:transition-colors [&_svg]:hover:fill-primary [&.active]:bg-[hsl(var(--nextui-default)/0.4)]'
       {...props}
     >
       {children}
