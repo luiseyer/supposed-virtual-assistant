@@ -32,12 +32,17 @@ export const Settings: React.FC = () => {
         <div className='flex items-center gap-4'>
           <h1 className='text-3xl font-bold'>Supposed Virtual Assistant</h1>
           <Tooltip content='Click to change color'>
-            <Button isIconOnly variant='light' className='animate-bounce' onClick={changeColor}>
+            <Button
+              isIconOnly
+              variant='light'
+              className='animate-bounce'
+              onClick={changeColor}
+            >
               <RiRobot2Fill size={32} className={colors[color]} />
             </Button>
           </Tooltip>
         </div>
-        <h2 className='text-3xl '>Settings</h2>
+        <h2 className='text-3xl'>Settings</h2>
       </div>
     </>
   )

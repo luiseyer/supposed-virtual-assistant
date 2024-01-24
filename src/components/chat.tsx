@@ -8,7 +8,12 @@ import {
   NavbarItem,
   Textarea,
 } from '@nextui-org/react'
-import { RiMore2Line, RiNotification4Line, RiRobot2Fill, RiSendPlane2Line } from '@remixicon/react'
+import {
+  RiMore2Line,
+  RiNotification4Line,
+  RiRobot2Fill,
+  RiSendPlane2Line,
+} from '@remixicon/react'
 import { useState } from 'react'
 
 export const Chat: React.FC = () => {
@@ -80,7 +85,10 @@ export const Chat: React.FC = () => {
 
       <div className='fixed bottom-6 left-0 flex w-full'>
         <div className='shrink-0 basis-72 px-4' />
-        <form onSubmit={handleSubmit} className='flex grow items-end gap-4 px-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='flex grow items-end gap-4 px-6'
+        >
           <Textarea
             value={value}
             onChange={handleChange}
