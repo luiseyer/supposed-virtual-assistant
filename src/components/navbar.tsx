@@ -1,22 +1,24 @@
 import { SearchInput } from '@components'
-import { Navbar as NextNavbar, NavbarBrand, NavbarContent, NavbarItem } from '@nextui-org/react'
-import React from 'react'
+import {
+  Navbar as NextNavbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+} from '@nextui-org/react'
 
-interface Props {
+interface Props extends React.HTMLProps<HTMLDivElement> {
   icon?: React.ReactNode
   title: string
-  children?: React.ReactNode
+}
+
+const classNames = {
+  base: 'bg-default-900',
+  brand: 'flex items-center gap-4 text-default-300 text-xl',
 }
 
 export const Navbar: React.FC<Props> = ({ title, icon, children }) => {
   return (
-    <NextNavbar
-      position='static'
-      classNames={{
-        base: 'bg-default-900',
-        brand: 'flex items-center gap-4 text-default-300 text-xl',
-      }}
-    >
+    <NextNavbar position='static' classNames={classNames}>
       <NavbarBrand>
         {icon}
         <p>{title}</p>
